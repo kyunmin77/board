@@ -1,0 +1,34 @@
+package article.command;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import article.service.ArticleContentNotFoundException;
+import article.service.ArticleData;
+import article.service.ArticleNotFoundException;
+import article.service.ReadArticleService;
+import mvc.command.CommandHandler;
+
+public class ReadArticleHandler implements CommandHandler {
+
+	private ReadArticleService readService = new ReadArticleService();
+	
+	@Override
+	public String process(HttpServletRequest req, HttpServletResponse res) throws Exception {
+		String noVal = req.getParameter("no");	//파라미터에서 번호를 받아옴
+		int articleNum = Integer.parseInt(noVal);
+		try {
+			
+			ArticleData articleData = readService.getArticle(articleNum, true);
+			req.setAttribute("articleData", articleData);
+			//해당 번호를 가진 게시글을 받아고 Request영역에 저장
+			
+			return "/WEB-INF/view/readArticle.jsp";	//readArticle페이지 주소를 반환
+		}catch(ArticleNotFoundException | ArticleContentNotFoundException e) {
+			req.getServletContext().log("no article", e);
+			res.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return null;
+		}
+	}
+
+}
